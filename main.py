@@ -10,6 +10,7 @@ import pandas as pd
 
 st.set_page_config(layout="wide", page_title="Extração de Dados de PDF")
 
+
 def parse_table(table):
     """
     Extrai os dados do OCR e organiza-os em um dicionário.
@@ -162,8 +163,6 @@ def create_dataframe_from_table(table):
     return pd.DataFrame([parsed_dict])
 
 
-
-
 def main():
     st.title("Extração de Dados de PDF em Streamlit")
 
@@ -237,11 +236,19 @@ def main():
 
         with col2:
             # Exibição da visualização (imagem da página)
-            with open(uploaded_file, "rb") as f:
-                base64_pdf = base64.b64encode(f.read()).decode("utf-8")
-            pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}#zoom=100" width="100%" height="1000" type="application/pdf"></iframe>'
-            st.markdown(pdf_display, unsafe_allow_html=True)
-
+            if uploaded_file is not None:
+                # Reinicia o ponteiro do arquivo para garantir que ele seja lido do início
+                uploaded_file.seek(0)
+                pdf_bytes = uploaded_file.read()
+                # Converte o PDF para base64
+                base64_pdf = base64.b64encode(pdf_bytes).decode("utf-8")
+                # Cria um iframe para exibir o PDF
+                pdf_display = f"""
+                <iframe src="data:application/pdf;base64,{base64_pdf}#zoom=100" width="100%" height="600" type="application/pdf"></iframe>
+                """
+                st.markdown(pdf_display, unsafe_allow_html=True)
+            else:
+                st.write("Não foi possível carregar o PDF.")
 
         # 5. Exportar para CSV
         if st.button("Exportar CSV"):
