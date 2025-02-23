@@ -7,6 +7,8 @@ import pandas as pd
 import re
 from io import BytesIO
 import pandas as pd
+import tempfile
+from streamlit.components.v1 import html
 
 st.set_page_config(layout="wide", page_title="Extração de Dados de PDF")
 
@@ -237,16 +239,29 @@ def main():
         with col2:
             # Exibição da visualização (imagem da página)
             if uploaded_file is not None:
-                # Reinicia o ponteiro do arquivo para garantir que ele seja lido do início
-                uploaded_file.seek(0)
+                # Reinicia o ponteiro do arquivo e lê os bytes
                 pdf_bytes = uploaded_file.read()
-                # Converte o PDF para base64
-                base64_pdf = base64.b64encode(pdf_bytes).decode("utf-8")
-                # Cria um iframe para exibir o PDF
-                pdf_display = f"""
-                <iframe src="data:application/pdf;base64,{base64_pdf}#zoom=100" width="100%" height="600" type="application/pdf"></iframe>
+
+                if "base64_pdf" not in st.session_state:
+                    st.session_state.base64_pdf = base64.b64encode(pdf_bytes).decode("utf-8")
+
+                if "page" not in st.session_state:
+                    st.session_state.page = 0
+
+                if "display_pdf" not in st.session_state:
+                    st.session_state.display_pdf = f"""
+                    <embed src="data:application/pdf;base64,{st.session_state.base64_pdf}#page={st.session_state.page}" width="550" height="900" type="application/pdf"></iframe>
                 """
-                st.markdown(pdf_display, unsafe_allow_html=True)
+
+                html(st.session_state.display_pdf, height=500)
+
+                if st.button("Go to page **5**"):
+                    st.session_state.page = 5
+                    st.session_state.display_pdf = f"""
+                    <embed src="data:application/pdf;base64,{st.session_state.base64_pdf}#page={st.session_state.page}" width="550" height="900" type="application/pdf"></iframe>
+                    """
+                    html(st.session_state.display_pdf, height=250)
+
             else:
                 st.write("Não foi possível carregar o PDF.")
 
