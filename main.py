@@ -265,7 +265,6 @@ def main():
         with col2:
             # Exibição da visualização (imagem da página)
              if uploaded_file is not None:
-                # Reinicia o ponteiro do arquivo e lê os bytes
                 pdf = pdfplumber.open(uploaded_file)
                 page_number = st.number_input(
                     "Selecione a página para visualizar",
