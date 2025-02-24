@@ -9,9 +9,13 @@ from io import BytesIO
 import pandas as pd
 import tempfile
 from streamlit.components.v1 import html
+import plotly.express as px
 
-st.set_page_config(layout="wide", page_title="Extração de Dados de PDF")
-
+st.set_page_config(
+    page_title="Extração de Dados de PDF",
+    layout="wide",
+    initial_sidebar_state="collapsed"  # Inicia a sidebar recolhida
+)
 
 def parse_table(table):
     """
@@ -140,7 +144,6 @@ def parse_table(table):
 
     return result
 
-
 # Função para extrair o texto de todas as páginas do PDF
 def extract_pdf_text(file):
     with pdfplumber.open(file) as pdf:
@@ -233,50 +236,55 @@ def main():
 
         with col1:
             # 4. Edição dos Dados
-            # Usando st.data_editor para permitir edição dos dados
             edited_df = st.data_editor(df, num_rows="dynamic")
+
+            # Cria 3 colunas para os botões
+            col_txt, col_xlsx = st.columns(2)
+
+            with col_txt:
+                txt_data = edited_df.to_string(index=False)
+                st.download_button(
+                    label="Exportar TXT",
+                    data=txt_data,
+                    file_name="dados_extraidos.txt",
+                    mime="text/plain"
+                )
+
+            with col_xlsx:
+                excel_buffer = io.BytesIO()
+                with pd.ExcelWriter(excel_buffer, engine="xlsxwriter") as writer:
+                    edited_df.to_excel(writer, index=False, sheet_name="Dados")
+                excel_data = excel_buffer.getvalue()
+                st.download_button(
+                    label="Exportar XLSX",
+                    data=excel_data,
+                    file_name="dados_extraidos.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
 
         with col2:
             # Exibição da visualização (imagem da página)
-            if uploaded_file is not None:
+             if uploaded_file is not None:
                 # Reinicia o ponteiro do arquivo e lê os bytes
-                pdf_bytes = uploaded_file.read()
-
-                if "base64_pdf" not in st.session_state:
-                    st.session_state.base64_pdf = base64.b64encode(pdf_bytes).decode("utf-8")
-
-                if "page" not in st.session_state:
-                    st.session_state.page = 0
-
-                if "display_pdf" not in st.session_state:
-                    st.session_state.display_pdf = f"""
-                    <embed src="data:application/pdf;base64,{st.session_state.base64_pdf}#page={st.session_state.page}" width="550" height="900" type="application/pdf"></iframe>
-                """
-
-                html(st.session_state.display_pdf, height=500)
-
-                if st.button("Go to page **5**"):
-                    st.session_state.page = 5
-                    st.session_state.display_pdf = f"""
-                    <embed src="data:application/pdf;base64,{st.session_state.base64_pdf}#page={st.session_state.page}" width="550" height="900" type="application/pdf"></iframe>
-                    """
-                    html(st.session_state.display_pdf, height=250)
-
-            else:
+                pdf = pdfplumber.open(uploaded_file)
+                page_number = st.number_input(
+                    "Selecione a página para visualizar",
+                    min_value=1,
+                    max_value=len(pdf.pages),
+                    value=1,
+                    step=1
+                )
+                # Converte a página selecionada em imagem
+                selected_page = pdf.pages[page_number - 1]
+                page_image = selected_page.to_image(resolution=800)
+                
+                # Exibe a imagem da página
+                st.image(page_image.original, caption=f"Página {page_number}")
+                # Reinicia o ponteiro do arquivo e lê os bytes
+             else:
                 st.write("Não foi possível carregar o PDF.")
 
-        # 5. Exportar para CSV
-        if st.button("Exportar CSV"):
-            csv_buffer = io.StringIO()
-            edited_df.to_csv(csv_buffer, index=False, sep=';')
-            csv_data = csv_buffer.getvalue()
-            
-            st.download_button(
-                label="Baixar CSV",
-                data=csv_data,
-                file_name="dados_extraidos.csv",
-                mime="text/csv"
-            )
+
 
 if __name__ == "__main__":
     main()
