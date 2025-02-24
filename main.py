@@ -7,9 +7,6 @@ import pandas as pd
 import re
 from io import BytesIO
 import pandas as pd
-import tempfile
-from streamlit.components.v1 import html
-import plotly.express as px
 
 st.set_page_config(
     page_title="Extração de Dados de PDF",
