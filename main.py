@@ -8,8 +8,9 @@ import re
 from io import BytesIO
 import pandas as pd
 
+
 st.set_page_config(
-    page_title="Extração de Dados de PDF",
+    page_title="Extração de Dados - Contra cheque",
     layout="wide",
     initial_sidebar_state="collapsed"  # Inicia a sidebar recolhida
 )
