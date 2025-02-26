@@ -82,7 +82,7 @@ def extract_id(text):
 
 
 def main():
-    st.title("Extração de Dados REGISTRO DO EMPREGADO - FICHA COMPLETA")
+    st.title("Extração de Dados - Ficha Completa")
     
     uploaded_file = st.file_uploader("Faça o upload do PDF", type=["pdf"])
     if uploaded_file is not None:
@@ -103,7 +103,7 @@ def main():
             try:
                 matricula = extract_id(page_text)
             except Exception as e:
-                st.warning(f"Erro ao extrair matrícula na página {idx+1}: {e}")
+                st.warning(f"Erro ao extrair o id na página {idx+1}: {e}")
                 continue
 
             if matricula:
@@ -111,7 +111,7 @@ def main():
                     users_pages[matricula] = []
                 users_pages[matricula].append(page_text)
             else:
-                st.warning(f"Matrícula não encontrada na página {idx+1}. Página ignorada.")
+                st.warning(f"id não encontrada na página {idx+1}. Página ignorada.")
         
         # 3) Processar os dados de cada usuário
         all_users_data = []
@@ -162,7 +162,7 @@ def main():
                 st.download_button(
                     label="Exportar TXT",
                     data=txt_data,
-                    file_name="dados_extraidos.txt",
+                    file_name="ficha_geral.txt",
                     mime="text/plain"
                 )
 
@@ -175,7 +175,7 @@ def main():
                     st.download_button(
                         label="Exportar XLSX",
                         data=excel_data,
-                        file_name="dados_extraidos.xlsx",
+                        file_name="ficha_geral.xlsx",
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                     )
                 except Exception as e:

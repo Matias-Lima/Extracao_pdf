@@ -167,17 +167,16 @@ def create_dataframe_from_table(table):
 
 
 def main():
-    st.title("Extração de Dados de PDF em Streamlit")
+    st.title("Extração de Dados - Contra cheque")
 
     # Upload do arquivo PDF
-    uploaded_file = st.file_uploader("Faça o upload de um PDF", type=["pdf"])
+    uploaded_file = st.file_uploader("Faça o upload de um PDF - Contra cheque", type=["pdf"])
 
     if uploaded_file is not None:
         # Extração de texto
         pdf_text = extract_pdf_text(uploaded_file)
         st.subheader("Texto Extraído")
         st.text_area("Conteúdo do PDF", pdf_text, height=200)
-
         # Extração de tabelas
         tables = extract_pdf_tables(uploaded_file)
         if tables:
@@ -221,7 +220,7 @@ def main():
             st.download_button(
                 label="Download Excel",
                 data=towrite,
-                file_name="demonstrativo_result.xlsx",
+                file_name="contra_cheque.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
         else:
@@ -244,7 +243,7 @@ def main():
                 st.download_button(
                     label="Exportar TXT",
                     data=txt_data,
-                    file_name="dados_extraidos.txt",
+                    file_name="contra_cheque.txt",
                     mime="text/plain"
                 )
 
@@ -256,7 +255,7 @@ def main():
                 st.download_button(
                     label="Exportar XLSX",
                     data=excel_data,
-                    file_name="dados_extraidos.xlsx",
+                    file_name="contra_cheque.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 )
 
